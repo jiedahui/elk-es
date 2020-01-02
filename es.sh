@@ -114,10 +114,10 @@ vm.swappiness=0
 vm.max_map_count=262144
 ' >> /etc/sysctl.conf
 
-sysctl –p
+sysctl -p
 sysctl -w vm.max_map_count=262144
 
-su - es -c "cd /usr/local/elasticsearch && nohup bin/elasticsearch &"
+#su - es -c "cd /usr/local/elasticsearch && nohup bin/elasticsearch &"
 
 if [ $? -eq 0 ]
 then 
@@ -144,7 +144,7 @@ then
 fi
 
 #解压head安装包
-unzip  $qjpath/$es_node
+unzip  $qjpath/$es_head
 mv elasticsearch-head-master /usr/local/elasticsearch-head-master
 
 #安装grunt
