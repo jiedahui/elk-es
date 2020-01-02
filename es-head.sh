@@ -61,7 +61,7 @@ useradd es
 echo '123456' | passwd --stdin 'es'
 
 #es节点配置
-es_num=2
+es_num=1
 es_node1="'192.168.0.109'"
 es_node2="'192.168.0.106'"
 es_master=true
@@ -114,7 +114,7 @@ vm.swappiness=0
 vm.max_map_count=262144
 ' >> /etc/sysctl.conf
 
-sysctl -p
+sysctl –p
 sysctl -w vm.max_map_count=262144
 
 su - es -c "cd /usr/local/elasticsearch && nohup bin/elasticsearch &"
@@ -124,7 +124,60 @@ then
 	echo '配置es部分完成'
 fi
 
+#配置node插件
+echo '开始配置head插件'
+yum -y install unzip
+tar xf $qjpath/$es_node -C /usr/local/
+mv /usr/local/node-v4.4.7-linux-x64 /usr/local/node
+echo '
+NODE_HOME=/usr/local/node
+PATH=$NODE_HOME/bin:$PATH
+export NODE_HOME PATH
+' >> /etc/profile.d/node.sh
+source /etc/profile.d/node.sh
+sleep 1
+node --version
+if [ $? -nq 0 ]
+then 
+	echo 'node插件配置失败'
+	exit
+fi
 
+#解压head安装包
+unzip  $qjpath/$es_head
+mv elasticsearch-head-master /usr/local/elasticsearch-head-master
+
+#安装grunt
+cd /usr/local/elasticsearch-head-master
+npm install -g grunt-cli
+sleep 1
+grunt –-version
+if [ $? -nq 0 ]
+then 
+	echo 'grunt插件配置失败'
+	exit
+fi
+rm -fr /usr/local/elasticsearch-head-master/Gruntfile.js
+cp $qjpath/Gruntfile.js /usr/local/elasticsearch-head-master/
+
+#安装phantomjs
+yum -y install bzip2
+cd $qjpath
+tar xf $qjpath/$es_phantomjs -C /usr/local/
+ln /usr/local/bin/phantomjs /usr/bin/phantomjs
+
+#运行head
+cd /usr/local/elasticsearch-head-master/
+npm install
+if [ $? -nq 0 ]
+then 
+	echo 'head插件配置失败'
+	exit
+fi
+
+nohup grunt server &
+ipaddr=`ip a | grep inet|grep brd|awk '{print $2}'|awk -F/ '{print $1}'` #获取当前ip
+echo "配置完成，访问http://${ipaddr}:9100"
 
 
 
