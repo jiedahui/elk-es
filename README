@@ -1,0 +1,6 @@
+ELK-elasticsearch安装：
+
+es-head.sh为带head插件安装，提供9100端口web页面访问的，在需要的es机器上跑这个，一般一台跑此脚本，其余es机器跑es.sh脚本即可。
+es.sh为不带head插件安装，就es集群的普通机器。
+
+脚本里的ip是我曾经实验的ip，需要更改为你实际的机器ip
